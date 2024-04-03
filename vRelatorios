@@ -1,0 +1,56 @@
+import tkinter as tk
+import customtkinter
+from tkinter import messagebox
+from control.cControlFunc import *
+
+class TelaRelatorios(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Cadastro de Cargo")
+        self.state("zoomed")
+
+        self.label = tk.Label(self, text="RELATORIOS", font=("Arial", 20))  # Cor de fundo e texto
+        self.label.pack(pady=(50, 10))
+
+        self.btnCadFunc = tk.Button(self, text="Funcionário x Salario", command=self.fCadFunc, width=20)  # Botão sem cor
+        self.btnCadFunc.pack(pady=10)
+
+        self.btnCadDep = tk.Button(self, text="Funcionario x Departamento", command=self.fCadDep, width=20)
+        self.btnCadDep.pack(pady=10)
+
+        self.btnCadTurno = tk.Button(self, text="Turno x Funcionario", command=self.fCadTurno, width=20)
+        self.btnCadTurno.pack(pady=10)
+
+        self.btnCadCargo = tk.Button(self, text="Cargo x Funcionario", command=self.fCadCargo, width=20)
+        self.btnCadCargo.pack(pady=10)
+
+        self.btnCadSalario = tk.Button(self, text="Balanço Geral", command=self.fCadSalario, width=20)
+        self.btnCadSalario.pack(pady=10)
+
+        self.btnSair = tk.Button(self, text="Voltar", command=self.voltaMenu, width=20)
+        self.btnSair.pack(pady=10)
+
+    def fCadFunc(self):
+        self.master.withdraw()
+        TelaCadFunc(self.master)
+
+    def fCadTurno(self):
+        self.master.withdraw()
+        TelaTurno(self.master)
+
+    def fCadDep(self):
+        self.master.withdraw()
+        TelaDepartamento(self.master)
+
+    def fCadCargo(self):
+        self.master.withdraw()
+        TelaCargo(self.master)
+
+    def fCadSalario(self):
+        self.master.withdraw()
+        TelaSalario(self.master)
+
+    def voltaMenu(self):
+        self.destroy()
+        self.master.deiconify()
+        self.master.state("zoomed")
