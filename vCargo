@@ -1,0 +1,44 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+from control.cControlFunc import *
+
+class TelaCargo(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Cadastro de Cargo")
+        self.state("zoomed")
+
+        self.label_titulo = tk.Label(self, text="Cadastro de Cargo", font=("Arial", 20, "bold"))
+        self.label_titulo.pack(pady=20)
+
+        self.frame_campos = tk.Frame(self)
+        self.frame_campos.pack(padx=20, pady=10)
+
+        self.label_nm_cargo = tk.Label(self.frame_campos, text="Nome Cargo", font=("Arial", 14))
+        self.label_nm_cargo.grid(row=1, column=0, pady=5)
+        self.entry_nm_cargo = tk.Entry(self.frame_campos, font=("Arial", 14))
+        self.entry_nm_cargo.grid(row=1, column=1, pady=5)
+
+        self.btn_salvar = tk.Button(self.frame_campos, text="Salvar", command=self.cadastrar_cargo)
+        self.btn_salvar.grid(row=3, column=0, pady=5, padx=5, sticky="we")
+
+        self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltaMenu)
+        self.btn_voltar.grid(row=3, column=1, pady=5, padx=5, sticky="we")
+
+    def cadastrar_cargo(self):
+        nm_cargo = self.entry_nm_cargo.get()
+
+        if not nm_cargo:
+            messagebox.showerror("Erro", "Por favor, preencha todos os campos.")
+            return
+
+        salvarCargo = cCargo(cd_cargo = 0, nm_cargo=nm_cargo)
+        salvarCargo.setCargo()
+
+        messagebox.showinfo("Sucesso", "Departamento cadastrado com sucesso!")
+
+    def voltaMenu(self):
+        self.destroy()
+        self.master.deiconify()
+        self.master.state("zoomed")
