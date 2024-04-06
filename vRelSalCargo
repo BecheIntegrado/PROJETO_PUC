@@ -1,0 +1,121 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+import pandas as pd
+from sqlalchemy import func
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from model.mCadastros import *
+from control.cControlFunc import *
+class TelaRelSalCargo(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Relatorio - Salario X Cargo")
+        self.state("zoomed")
+
+        self.label_titulo = tk.Label(self, text="Relatorio - Salario X Cargo", font=("Arial", 20, "bold"))
+        self.label_titulo.pack(pady=20)
+
+        self.frame_campos = tk.Frame(self)
+        self.frame_campos.pack(padx=20, pady=10)
+
+        self.label_cd_cargo = tk.Label(self.frame_campos, text="Cargo:", font=("Arial", 14))
+        self.label_cd_cargo.grid(row=2, column=0, pady=5, sticky="w")
+        self.entry_cd_cargo = tk.Entry(self.frame_campos, font=("Arial", 14), width=5)
+        self.entry_cd_cargo.bind("<KeyPress-Tab>", self.getNomeCargo)
+        self.entry_cd_cargo.grid(row=2, column=1, pady=5, sticky="w")
+        self.entry_nm_cargo = tk.Entry(self.frame_campos, font=("Arial", 14))
+        self.entry_nm_cargo.grid(row=2, column=2, pady=5, sticky="w")
+        self.entry_nm_cargo.bind("<Key>", self.getNomeCargo)
+
+        self.btnRelatorio = tk.Button(self.frame_campos, text="Buscar", command=self.gerar_grafico)
+        self.btnRelatorio.grid(row=3, column=1, pady=5, padx=5, sticky="we")
+
+        self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltar_menu)
+        self.btn_voltar.grid(row=3, column=2, pady=5, padx=5, sticky="we")
+
+        # Inicializar uma área para exibir o gráfico
+        self.fig = plt.figure(figsize=(10, 6))
+        self.ax = self.fig.add_subplot(111)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    def getNomeCargo(self, event):
+        cd_cargo = self.entry_cd_cargo.get()
+        if not cd_cargo:
+            messagebox.showerror("Erro", "Por favor, informe o código do cargo.")
+            return
+
+        buscaCargo = cCargo(cd_cargo=cd_cargo, nm_cargo='')
+        nomeCargo  = buscaCargo.getNomeCargo()
+
+        print(nomeCargo)
+
+        if not nomeCargo:
+            messagebox.showerror("Erro", "Cargo não encontrado.")
+            return
+
+        self.entry_nm_cargo.delete(0, tk.END)  # Limpa o campo de entrada do nome do departamento
+        self.entry_nm_cargo.insert(0, nomeCargo[0].nm_cargo)  # Insere o nome do departamento no campo de entrada
+
+        return nomeCargo
+
+    def gerar_grafico(self):
+        cd_cargoFunc = self.entry_cd_cargo.get()
+        if not cd_cargoFunc:
+            dados = self.busca_todos_dados()
+        else:
+            dados = self.buscar_dados(cd_cargoFunc)
+
+        if dados.empty:
+            messagebox.showwarning("Aviso", "Nenhum dado encontrado para o cargo informado.")
+            return
+
+        self.mostrar_grafico(dados)
+
+    def busca_todos_dados(self):
+        query = session.query(func.avg(mSalario.qt_salbruto).label('total_salario'), mCargo.nm_cargo).\
+                        join(mCadastro_funcionario, mSalario.cd_salario == mCadastro_funcionario.cd_salario).\
+                        join(mFuncionario, mFuncionario.cd_func == mCadastro_funcionario.cd_func).\
+                        join(mCargo, mCargo.cd_cargo == mCadastro_funcionario.cd_cargo).\
+                        filter(mFuncionario.dt_demissao == None).\
+                        group_by(mCargo.nm_cargo)
+        return pd.read_sql(query.statement, query.session.bind)
+
+    def buscar_dados(self, cd_cargoFunc):
+        query = session.query(func.avg(mSalario.qt_salbruto).label('total_salario'), mCargo.nm_cargo).\
+                        join(mCadastro_funcionario, mSalario.cd_salario == mCadastro_funcionario.cd_salario).\
+                        join(mFuncionario, mFuncionario.cd_func == mCadastro_funcionario.cd_func).\
+                        join(mCargo, mCargo.cd_cargo == mCadastro_funcionario.cd_cargo).\
+                        filter(mFuncionario.dt_demissao == None).\
+                        filter(mCargo.cd_cargo == cd_cargoFunc).\
+                        group_by(mCargo.nm_cargo)
+        return pd.read_sql(query.statement, query.session.bind)
+
+    def mostrar_grafico(self, dados):
+        self.ax.clear()
+        bars = self.ax.bar(dados['nm_cargo'], dados['total_salario'], color='skyblue')
+
+        self.ax.set_title('Media Salarial por Cargo')
+        self.ax.set_ylabel('Custo Total Mensal (R$)')
+
+        for bar in bars:
+            height = bar.get_height()
+            self.ax.annotate('{}'.format(height),
+                             xy=(bar.get_x() + bar.get_width() / 2, height),
+                             xytext=(0, 3),
+                             textcoords="offset points",
+                             ha='center', va='bottom')
+
+        plt.xticks(rotation=45, ha='right')
+        self.ax.grid(True, linestyle='--', alpha=0.7)
+        plt.tight_layout()
+
+        # Atualizar o gráfico na tela
+        self.canvas.draw()
+
+    def voltar_menu(self):
+        self.destroy()
+        self.master.deiconify()
+        self.master.state("zoomed")
