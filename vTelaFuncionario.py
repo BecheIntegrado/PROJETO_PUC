@@ -162,8 +162,6 @@ class TelaCadFunc(tk.Toplevel):
         buscaCargo = cCargo(cd_cargo=cd_cargo, nm_cargo='')
         nomeCargo  = buscaCargo.getNomeCargo()
 
-        print(nomeCargo)
-
         if not nomeCargo:
             messagebox.showerror("Erro", "Cargo não encontrado.")
             return
@@ -214,12 +212,12 @@ class TelaCadFunc(tk.Toplevel):
                                         dt_admissao = dt_admissao, in_sexo      = in_sexo,       cd_dep  = cd_dep,
                                         cd_turno    = cd_turno)
 
-        cod_func = salvaFuncionario.setFuncionario()
+        cd_func = salvaFuncionario.setFuncionario()
 
-        salvarEndereco = cEndereco(cd_func = cod_func, cd_cep   = cd_cep,  nm_cidade = nm_cidade, nm_rua = nm_rua, nm_bairro = nm_bairro,
+        salvarEndereco = cEndereco(cd_func = cd_func, cd_cep   = cd_cep,  nm_cidade = nm_cidade, nm_rua = nm_rua, nm_bairro = nm_bairro,
                                    nr_casa = nr_casa,  ds_compl = ds_compl)
 
-        salvaContato = cContato(cd_func = cod_func, ds_email = ds_email, ds_telefone = ds_telefone)
+        salvaContato = cContato(cd_func = cd_func, ds_email = ds_email, ds_telefone = ds_telefone)
 
         salvaSalario = cSalario(qt_salbruto = qt_salbruto)
 
@@ -230,7 +228,12 @@ class TelaCadFunc(tk.Toplevel):
 
             cd_salario = salvaSalario.setSalario()
 
-            salvaCadFunc = cCadFunc(cd_func = cod_func, cd_cargo = cd_cargo, cd_salario = cd_salario, dt_inivig = dt_inivig, dt_fimvig = '')
+            print(cd_salario)
+
+            salvaCadFunc = cCadFunc(cd_func = cd_func, cd_cargo = cd_cargo, cd_salario = cd_salario, dt_inivig = dt_inivig, dt_fimvig = '')
+
+            salvaCadFunc.setCadFunc()
+
         except ValueError:
             session.rollback()
             messagebox.showerror("Erro", "Erro em salvar os registros.")
@@ -239,6 +242,25 @@ class TelaCadFunc(tk.Toplevel):
         session.commit()
 
         messagebox.showinfo("Sucesso", "Funcionário cadastrado com sucesso!")
+        self.entry_nome.delete(0, tk.END)
+        self.entry_sobrenome.delete(0, tk.END)
+        self.entry_dt_nasc.delete(0, tk.END)
+        self.sexo_combobox.set("Masculino")
+        self.entry_cep.delete(0, tk.END)
+        self.entry_cidade.delete(0, tk.END)
+        self.entry_rua.delete(0, tk.END)
+        self.entry_bairro.delete(0, tk.END)
+        self.entry_nr_casa.delete(0, tk.END)
+        self.entry_complemento.delete(0, tk.END)
+        self.entry_cd_dep.delete(0, tk.END)
+        self.entry_nm_dep.delete(0, tk.END)
+        self.entry_cd_cargo.delete(0, tk.END)
+        self.entry_nm_cargo.delete(0, tk.END)
+        self.entry_cd_turno.delete(0, tk.END)
+        self.entry_nm_turno.delete(0, tk.END)
+        self.entry_email.delete(0, tk.END)
+        self.entry_telefone.delete(0, tk.END)
+        self.entry_salario.delete(0, tk.END)
 
     def voltaMenu(self):
         self.destroy()
