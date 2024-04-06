@@ -2,7 +2,8 @@ import tkinter as tk
 import customtkinter
 from tkinter import messagebox
 from control.cControlFunc import *
-
+from vRelSalCargo import *
+from vRelFunc import *
 class TelaRelatorios(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
@@ -12,13 +13,13 @@ class TelaRelatorios(tk.Toplevel):
         self.label = tk.Label(self, text="RELATORIOS", font=("Arial", 20))  # Cor de fundo e texto
         self.label.pack(pady=(50, 10))
 
-        self.btnCadFunc = tk.Button(self, text="Funcionário x Salario", command=self.fCadFunc, width=20)  # Botão sem cor
+        self.btnCadFunc = tk.Button(self, text="Salario X Cargo", command=self.fRelSalCargo, width=20)  # Botão sem cor
         self.btnCadFunc.pack(pady=10)
 
-        self.btnCadDep = tk.Button(self, text="Funcionario x Departamento", command=self.fCadDep, width=20)
+        self.btnCadDep = tk.Button(self, text="Funcionario x Departamento", command=self.fRelFunc, width=20)
         self.btnCadDep.pack(pady=10)
 
-        self.btnCadTurno = tk.Button(self, text="Turno x Funcionario", command=self.fCadTurno, width=20)
+        self.btnCadTurno = tk.Button(self, text="Turno x Funcionario", command=self.fRelFunc, width=20)
         self.btnCadTurno.pack(pady=10)
 
         self.btnCadCargo = tk.Button(self, text="Cargo x Funcionario", command=self.fCadCargo, width=20)
@@ -30,13 +31,13 @@ class TelaRelatorios(tk.Toplevel):
         self.btnSair = tk.Button(self, text="Voltar", command=self.voltaMenu, width=20)
         self.btnSair.pack(pady=10)
 
-    def fCadFunc(self):
+    def fRelSalCargo(self):
         self.master.withdraw()
-        TelaCadFunc(self.master)
+        TelaRelSalCargo(self.master)
 
-    def fCadTurno(self):
+    def fRelFunc(self):
         self.master.withdraw()
-        TelaTurno(self.master)
+        TelaRelFunc(self.master)
 
     def fCadDep(self):
         self.master.withdraw()
