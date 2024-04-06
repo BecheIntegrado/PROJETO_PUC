@@ -53,6 +53,14 @@ class mFuncionario(Base):
     dt_demissao   = mapped_column(DATE, nullable=True)
     in_sexo       = mapped_column(CHAR(1), nullable=False)
 
+class mPonto(Base):
+    __tablename__ = "PONTO"
+    cd_ponto        = mapped_column(INTEGER, Sequence('SQ_PONTO'), nullable=False, primary_key=True)
+    cd_func         = mapped_column(INTEGER, ForeignKey(mFuncionario.cd_func))
+    dt_expediente   = mapped_column(DATE, nullable=True)
+    dt_entrada      = mapped_column(DATE, nullable=True)
+    dt_saida        = mapped_column(DATE, nullable=True)
+
 class mContato(Base):
     __tablename__ = "CONTATO"
     cd_contato    = mapped_column(INTEGER, Sequence('SQ_CONTATO'), nullable=False, primary_key=True)
