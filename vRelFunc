@@ -1,0 +1,146 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+import pandas as pd
+from sqlalchemy import func
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from model.mCadastros import *
+from control.cControlFunc import *
+
+class TelaRelFunc(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Relatorio - Funcionario")
+        self.state("zoomed")
+
+        self.label_titulo = tk.Label(self, text="Relatorio - Funcionario", font=("Arial", 20, "bold"))
+        self.label_titulo.pack(pady=20)
+
+        self.frame_campos = tk.Frame(self)
+        self.frame_campos.pack(padx=20, pady=10)
+
+        self.label_cd_func = tk.Label(self.frame_campos, text="Funcionario:", font=("Arial", 14))
+        self.label_cd_func.grid(row=2, column=0, pady=5, sticky="w")
+        self.entry_cd_func = tk.Entry(self.frame_campos, font=("Arial", 14), width=5)
+        self.entry_cd_func.bind("<KeyPress-Tab>", self.getNomeFunc)
+        self.entry_cd_func.grid(row=2, column=1, pady=5, sticky="w")
+        self.entry_nm_func = tk.Entry(self.frame_campos, font=("Arial", 14))
+        self.entry_nm_func.grid(row=2, column=2, pady=5, sticky="w")
+        self.entry_nm_func.bind("<Key>", self.getNomeFunc)
+
+        self.btnRelatorio = tk.Button(self.frame_campos, text="Buscar", command=self.gerar_grafico)
+        self.btnRelatorio.grid(row=3, column=1, pady=5, padx=5, sticky="we")
+
+        self.btnLimpar = tk.Button(self.frame_campos, text="Limpar", command=self.limpar_campos)
+        self.btnLimpar.grid(row=3, column=2, pady=5, padx=5, sticky="we")
+
+        self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltar_menu)
+        self.btn_voltar.grid(row=3, column=3, pady=5, padx=5, sticky="we")
+
+        self.treeview = ttk.Treeview(self, columns=('NOME', 'SOBRENOME', 'IDADE', 'CARGO', 'DEPARTAMENTO', 'ADMISSAO'), show='headings')
+        self.treeview.heading('NOME', text='NOME')
+        self.treeview.heading('SOBRENOME', text='SOBRENOME')
+        self.treeview.heading('IDADE', text='IDADE')
+        self.treeview.heading('CARGO', text='CARGO')
+        self.treeview.heading('DEPARTAMENTO', text='DEPARTAMENTO')
+        self.treeview.heading('ADMISSAO', text='ADMISSAO')
+        self.treeview.pack(fill='both', expand=True)
+
+        # Alinhamento das colunas
+        self.treeview.column('NOME', anchor='center')
+        self.treeview.column('SOBRENOME', anchor='center')
+        self.treeview.column('IDADE', anchor='center')
+        self.treeview.column('CARGO', anchor='center')
+        self.treeview.column('DEPARTAMENTO', anchor='center')
+        self.treeview.column('ADMISSAO', anchor='center')
+
+    def limpar_campos(self):
+        self.entry_cd_func.delete(0, tk.END)
+        self.entry_nm_func.delete(0, tk.END)
+
+    def getNomeFunc(self, event):
+        cd_func = self.entry_cd_func.get()
+
+        buscaFunc = cGetFuncionario(cd_func = cd_func)
+
+        nomeFunc  = buscaFunc.getNameFunc()
+
+        print(nomeFunc)
+
+        if not nomeFunc:
+            messagebox.showerror("Erro", "Funcionario não encontrado.")
+            return
+
+        self.entry_nm_func.delete(0, tk.END)
+        self.entry_nm_func.insert(0, nomeFunc[0].nm_func + ' ' + nomeFunc[0].nm_sobrenome)
+
+        return nomeFunc
+
+    def gerar_grafico(self):
+        cd_func = self.entry_cd_func.get()
+        if not cd_func:
+            dados = self.busca_todos_dados()
+        else:
+            dados = self.buscar_dados(cd_func)
+
+        if dados.empty:
+            messagebox.showwarning("Aviso", "Nenhum dado encontrado para o funcionario informado.")
+            return
+
+        self.mostrar_tabela(dados)
+
+    def busca_todos_dados(self):
+
+        query = session.query(
+            mFuncionario.nm_func.label('NOME') ,
+            mFuncionario.nm_sobrenome.label('SOBRENOME'),
+            (datetime.datetime.now().year - func.extract('year', mFuncionario.dt_nasc)).label('IDADE'),
+            mCargo.nm_cargo.label('CARGO'),
+            mDepartamento.nm_dep.label('DEPARTAMENTO'),
+            func.to_char(mFuncionario.dt_admissao, 'DD/MM/YYYY').label('ADMISSAO')
+        ).join(
+            mCadastro_funcionario, mFuncionario.cd_func == mCadastro_funcionario.cd_func
+        ).join(
+            mCargo, mCadastro_funcionario.cd_cargo == mCargo.cd_cargo
+        ).join(
+            mDepartamento, mFuncionario.cd_dep == mDepartamento.cd_dep
+        ).join(
+            mSalario, mCadastro_funcionario.cd_salario == mSalario.cd_salario
+        )
+
+        return pd.read_sql(query.statement, query.session.bind)
+
+    def buscar_dados(self, cd_func):
+        query = session.query(
+            mFuncionario.nm_func.label('NOME') ,
+            mFuncionario.nm_sobrenome.label('SOBRENOME'),
+            (datetime.datetime.now().year - func.extract('year', mFuncionario.dt_nasc)).label('IDADE'),
+            mCargo.nm_cargo.label('CARGO'),
+            mDepartamento.nm_dep.label('DEPARTAMENTO'),
+            func.to_char(mFuncionario.dt_admissao, 'DD/MM/YYYY').label('ADMISSAO')
+        ).join(
+            mCadastro_funcionario, mFuncionario.cd_func == mCadastro_funcionario.cd_func
+        ).join(
+            mCargo, mCadastro_funcionario.cd_cargo == mCargo.cd_cargo
+        ).join(
+            mDepartamento, mFuncionario.cd_dep == mDepartamento.cd_dep
+        ).join(
+            mSalario, mCadastro_funcionario.cd_salario == mSalario.cd_salario
+        ).filter(
+            mFuncionario.cd_func == cd_func
+        )
+
+        return pd.read_sql(query.statement, query.session.bind)
+
+    def mostrar_tabela(self, dados):
+        self.treeview.delete(*self.treeview.get_children())  # Limpa os itens anteriores da tabela
+
+        # Adiciona os dados à tabela
+        for index, row in dados.iterrows():
+            self.treeview.insert('', 'end', values=(row['NOME'], row['SOBRENOME'], row['IDADE'], row['CARGO'], row['DEPARTAMENTO'], row['ADMISSAO']))
+
+    def voltar_menu(self):
+        self.destroy()
+        self.master.deiconify()
+        self.master.state("zoomed")
