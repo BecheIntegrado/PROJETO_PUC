@@ -99,7 +99,6 @@ class cCargo():
     def getNomeCargo(self):
         response = session.query(mCargo.nm_cargo).filter(mCargo.cd_cargo == self.cd_cargo)
 
-
         return response
 
 class cSalario():
@@ -112,7 +111,7 @@ class cSalario():
         session.flush()
         return model.cd_salario
 
-class cCadastroFuncionario():
+class cCadFunc():
     def __init__(self, cd_func, cd_cargo, cd_salario, dt_inivig, dt_fimvig):
         self.cd_func = cd_func
         self.cd_cargo = cd_cargo
@@ -120,7 +119,33 @@ class cCadastroFuncionario():
         self.dt_inivig = dt_inivig
         self.dt_fimvig = dt_fimvig
 
-    def setSalario(self):
-        model = mSalario(cd_func = self.cd_func, cd_cargo = self.cd_cargo, cd_salario = self.cd_salario, dt_inivig = self.dt_inivig, dt_fimvig = self.dt_fimvig)
+    def setCadFunc(self):
+        model = mCadastro_funcionario(cd_func = self.cd_func, cd_cargo = self.cd_cargo, cd_salario = self.cd_salario, dt_inivig = self.dt_inivig, dt_fimvig = self.dt_fimvig)
         session.add(model)
         session.flush()
+
+
+class cRelSalario():
+    def __init__(self, cd_func):
+        self.cd_func = cd_func
+
+    def getRelSalario():
+        resultado = session.query(func.sum(mSalario.qt_salbruto), mCargo.nm_cargo).\
+                    join(mCadastro_funcionario, mSalario.cd_salario == mCadastro_funcionario.cd_salario).\
+                    join(mFuncionario, mFuncionario.cd_func == mCadastro_funcionario.cd_func).\
+                    join(mCargo, mCargo.cd_cargo == mCadastro_funcionario.cd_cargo).\
+                    filter(mFuncionario.dt_demissao == None).\
+                    group_by(mCargo.nm_cargo).all()
+
+        # Exibir o resultado
+        for row in resultado:
+            print(row)
+
+class cGetFuncionario():
+    def __init__(self, cd_func):
+        self.cd_func = cd_func
+
+    def getNameFunc(self):
+        response = session.query(mFuncionario.nm_func, mFuncionario.nm_sobrenome).filter(mFuncionario.cd_func == self.cd_func)
+
+        return response
