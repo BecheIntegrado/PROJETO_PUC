@@ -82,24 +82,3 @@ class mCadastro_funcionario(Base):
 
     def __str__(self) -> str:
         return super().__str__()
-
-#def criaFuncionario(cpf, nome, email, telefone, data_nasc):
-#    pessoa = Pessoa(cpf=cpf, nome=nome, email=email, telefone=telefone, data_nasc=datetime.strptime(data_nasc, '%d-%m-%Y'))
-#    return pessoa
-
-#response = session.query(func.count(cadastro_funcionario.cd_cadfunc)).all()
-#print(response)
-
-#response = session.query(cadastro_funcionario).first()
-#response = session.query(Pessoa).order_by(Pessoa.nome)
-
-# Clausulas
-#response: list[tuple[Pessoa, Usuario]] = session.query(Pessoa, Usuario).join(Usuario, Usuario.codigo == Pessoa.codigo).all()
-
-#result = session.query(Pessoa.nome, Usuario.carteirinha, Emprestimo).join(Usuario, Usuario.codigo == Pessoa.codigo).join(Emprestimo, Emprestimo.codigo_usuario == Usuario.codigo, isouter=True).order_by(Pessoa.nome).all()
-
-#result = session.query(Pessoa.codigo, Pessoa.nome, func.count(distinct(LivrosCategorias.codigo_categoria)).label('Numero de Categorias')).join(Usuario, Usuario.codigo == Pessoa.codigo).join(Emprestimo, Emprestimo.codigo_usuario == Usuario.codigo, isouter=True).join(EmprestimosLivros, EmprestimosLivros.codigo_emprestimo == Emprestimo.codigo, isouter=True).join(Livro, Livro.isbn == EmprestimosLivros.isbn_livro, isouter=True).join(LivrosCategorias, LivrosCategorias.isbn_livro == Livro.isbn, isouter=True).group_by(Pessoa.codigo, Pessoa.nome).having(func.count(distinct(LivrosCategorias.codigo_categoria)) >= 1).all()
-
-#print(result)
-
-
