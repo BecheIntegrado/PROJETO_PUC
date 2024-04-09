@@ -6,7 +6,7 @@ from vTelaTurno import *
 from vCargo import *
 from vSalario import *
 from vRelatorios import *
-
+from vPonto import *
 class Aplicacao(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -36,8 +36,8 @@ class TelaMenu(tk.Frame):
         self.btnCadCargo = tk.Button(self, text="Cargo", command=self.fCadCargo, width=20)
         self.btnCadCargo.pack(pady=10)
 
-        self.btnCadSalario = tk.Button(self, text="Salario", command=self.fCadSalario, width=20)
-        self.btnCadSalario.pack(pady=10)
+        self.btnCadCargo = tk.Button(self, text="Ponto", command=self.fCadPonto, width=20)
+        self.btnCadCargo.pack(pady=10)
 
         self.btnCadSalario = tk.Button(self, text="Relatorios", command=self.fRelatorios, width=20)
         self.btnCadSalario.pack(pady=10)
@@ -61,9 +61,9 @@ class TelaMenu(tk.Frame):
         self.master.withdraw()
         TelaCargo(self.master)
 
-    def fCadSalario(self):
+    def fCadPonto(self):
         self.master.withdraw()
-        TelaSalario(self.master)
+        TelaPonto(self.master)
 
     def fRelatorios(self):
         self.master.withdraw()
