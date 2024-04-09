@@ -28,10 +28,13 @@ class TelaTurno(tk.Toplevel):
         self.entry_fimTurno.grid(row=2, column=2, pady=5)
 
         self.btn_salvar = tk.Button(self.frame_campos, text="Salvar", command=self.cadastrar_turno)
-        self.btn_salvar.grid(row=3, column=0, pady=5, padx=5, sticky="we")
+        self.btn_salvar.grid(row=3, column=0, pady=5, padx=5)
+
+        self.btn_limpar = tk.Button(self.frame_campos, text="Limpar", command=self.limparCampos)
+        self.btn_limpar.grid(row=3, column=1, pady=5, padx=5)
 
         self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltaMenu)
-        self.btn_voltar.grid(row=3, column=1, pady=5, padx=5, sticky="we")
+        self.btn_voltar.grid(row=3, column=2, pady=5, padx=5)
 
 
     def cadastrar_turno(self):
@@ -47,9 +50,16 @@ class TelaTurno(tk.Toplevel):
         salvaTurno = cTurno(cd_turno = cd_turno, in_ativo = in_ativo, qt_tempper = qt_tempper, hr_inicio = hr_inicio, hr_fim = hr_fim)
         salvaTurno.setTurno()
 
+        self.limparCampos()
+
         messagebox.showinfo("Sucesso", "Departamento cadastrado com sucesso!")
 
     def voltaMenu(self):
         self.destroy()
         self.master.deiconify()
         self.master.state("zoomed")
+
+    def limparCampos(self):
+        self.entry_qtAlmoco.delete(0, tk.END)
+        self.entry_iniTurno.delete(0, tk.END)
+        self.entry_fimTurno.delete(0, tk.END)
