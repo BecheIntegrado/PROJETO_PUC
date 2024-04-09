@@ -4,6 +4,9 @@ from tkinter import messagebox
 from control.cControlFunc import *
 from vRelSalCargo import *
 from vRelFunc import *
+from vRelBalanco import *
+from vRelTurno import *
+from vHolerite import *
 class TelaRelatorios(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
@@ -16,17 +19,17 @@ class TelaRelatorios(tk.Toplevel):
         self.btnCadFunc = tk.Button(self, text="Salario X Cargo", command=self.fRelSalCargo, width=20)  # Botão sem cor
         self.btnCadFunc.pack(pady=10)
 
-        self.btnCadDep = tk.Button(self, text="Funcionario x Departamento", command=self.fRelFunc, width=20)
+        self.btnCadDep = tk.Button(self, text="Funcionarios", command=self.fRelFunc, width=20)
         self.btnCadDep.pack(pady=10)
 
-        self.btnCadTurno = tk.Button(self, text="Turno x Funcionario", command=self.fRelFunc, width=20)
+        self.btnCadSalario = tk.Button(self, text="Balanço Geral", command=self.fRelBalanco, width=20)
+        self.btnCadSalario.pack(pady=10)
+
+        self.btnCadTurno = tk.Button(self, text="Turnos", command=self.fRelTurno, width=20)
         self.btnCadTurno.pack(pady=10)
 
-        self.btnCadCargo = tk.Button(self, text="Cargo x Funcionario", command=self.fCadCargo, width=20)
-        self.btnCadCargo.pack(pady=10)
-
-        self.btnCadSalario = tk.Button(self, text="Balanço Geral", command=self.fCadSalario, width=20)
-        self.btnCadSalario.pack(pady=10)
+        self.btnHolerite = tk.Button(self, text="Holerite", command=self.fRelHolerite, width=20)
+        self.btnHolerite.pack(pady=10)
 
         self.btnSair = tk.Button(self, text="Voltar", command=self.voltaMenu, width=20)
         self.btnSair.pack(pady=10)
@@ -39,17 +42,17 @@ class TelaRelatorios(tk.Toplevel):
         self.master.withdraw()
         TelaRelFunc(self.master)
 
-    def fCadDep(self):
+    def fRelBalanco(self):
         self.master.withdraw()
-        TelaDepartamento(self.master)
+        TelaRelBalanco(self.master)
 
-    def fCadCargo(self):
+    def fRelTurno(self):
         self.master.withdraw()
-        TelaCargo(self.master)
+        TelaRelTurno(self.master)
 
-    def fCadSalario(self):
+    def fRelHolerite(self):
         self.master.withdraw()
-        TelaSalario(self.master)
+        TelaHolterite(self.master)
 
     def voltaMenu(self):
         self.destroy()
