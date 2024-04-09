@@ -112,8 +112,32 @@ class TelaCadFunc(tk.Toplevel):
         self.btn_salvar = tk.Button(self.frame_campos, text="Salvar", command=self.cadastrar_funcionario)
         self.btn_salvar.grid(row=17, column=0, pady=5, padx=5, sticky="we")
 
+        self.btn_limpar = tk.Button(self.frame_campos, text="Limpar", command=self.limpar_campos)
+        self.btn_limpar.grid(row=17, column=1, pady=5, padx=5, sticky="we")
+
         self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltaMenu)
-        self.btn_voltar.grid(row=17, column=1, pady=5, padx=5, sticky="we")
+        self.btn_voltar.grid(row=17, column=2, pady=5, padx=5, sticky="we")
+
+    def limpar_campos(self):
+        self.entry_nome.delete(0, tk.END)
+        self.entry_sobrenome.delete(0, tk.END)
+        self.entry_dt_nasc.delete(0, tk.END)
+        self.sexo_combobox.set("Masculino")
+        self.entry_cep.delete(0, tk.END)
+        self.entry_cidade.delete(0, tk.END)
+        self.entry_rua.delete(0, tk.END)
+        self.entry_bairro.delete(0, tk.END)
+        self.entry_nr_casa.delete(0, tk.END)
+        self.entry_complemento.delete(0, tk.END)
+        self.entry_cd_dep.delete(0, tk.END)
+        self.entry_nm_dep.delete(0, tk.END)
+        self.entry_cd_cargo.delete(0, tk.END)
+        self.entry_nm_cargo.delete(0, tk.END)
+        self.entry_cd_turno.delete(0, tk.END)
+        self.entry_nm_turno.delete(0, tk.END)
+        self.entry_email.delete(0, tk.END)
+        self.entry_telefone.delete(0, tk.END)
+        self.entry_salario.delete(0, tk.END)
 
     def getTurno(self, event):
         cd_turno = self.entry_cd_turno.get()
@@ -174,7 +198,7 @@ class TelaCadFunc(tk.Toplevel):
     def cadastrar_funcionario(self):
         nm_func = self.entry_nome.get()
         nm_sobrenome = self.entry_sobrenome.get()
-        dt_admissao = datetime.date.today()
+        dt_admissao = datetime.today()
         dt_nasc = self.entry_dt_nasc.get_date().strftime('%d/%m/%Y')
         combo_sexo = self.sexo_combobox.get()
         in_sexo = ''
@@ -190,7 +214,7 @@ class TelaCadFunc(tk.Toplevel):
         ds_email = self.entry_email.get()
         ds_telefone = self.entry_telefone.get()
         qt_salbruto = self.entry_salario.get()
-        dt_inivig = datetime.date.today()
+        dt_inivig = datetime.today()
 
         if not nm_func or not nm_sobrenome or not dt_nasc or not combo_sexo:
             messagebox.showerror("Erro", "Por favor, preencha todos os campos.")
@@ -241,26 +265,9 @@ class TelaCadFunc(tk.Toplevel):
 
         session.commit()
 
+        #self.limpar_campos()
+
         messagebox.showinfo("Sucesso", "Funcionário cadastrado com sucesso!")
-        self.entry_nome.delete(0, tk.END)
-        self.entry_sobrenome.delete(0, tk.END)
-        self.entry_dt_nasc.delete(0, tk.END)
-        self.sexo_combobox.set("Masculino")
-        self.entry_cep.delete(0, tk.END)
-        self.entry_cidade.delete(0, tk.END)
-        self.entry_rua.delete(0, tk.END)
-        self.entry_bairro.delete(0, tk.END)
-        self.entry_nr_casa.delete(0, tk.END)
-        self.entry_complemento.delete(0, tk.END)
-        self.entry_cd_dep.delete(0, tk.END)
-        self.entry_nm_dep.delete(0, tk.END)
-        self.entry_cd_cargo.delete(0, tk.END)
-        self.entry_nm_cargo.delete(0, tk.END)
-        self.entry_cd_turno.delete(0, tk.END)
-        self.entry_nm_turno.delete(0, tk.END)
-        self.entry_email.delete(0, tk.END)
-        self.entry_telefone.delete(0, tk.END)
-        self.entry_salario.delete(0, tk.END)
 
     def voltaMenu(self):
         self.destroy()
