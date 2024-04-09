@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from model.mCadastros import *
 from control.cControlFunc import *
+
 class TelaRelSalCargo(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
         self.title("Relatorio - Salario X Cargo")
         self.state("zoomed")
 
-        self.label_titulo = tk.Label(self, text="Relatorio - Salario X Cargo", font=("Arial", 20, "bold"))
+        self.label_titulo = tk.Label(self, text="Relatorio Media Salarial", font=("Arial", 20, "bold"))
         self.label_titulo.pack(pady=20)
 
         self.frame_campos = tk.Frame(self)
@@ -81,7 +82,9 @@ class TelaRelSalCargo(tk.Toplevel):
                         join(mCargo, mCargo.cd_cargo == mCadastro_funcionario.cd_cargo).\
                         filter(mFuncionario.dt_demissao == None).\
                         group_by(mCargo.nm_cargo)
-        return pd.read_sql(query.statement, query.session.bind)
+        result = pd.read_sql(query.statement, query.session.bind)
+        result['total_salario'] = result['total_salario'].round(2)
+        return result
 
     def buscar_dados(self, cd_cargoFunc):
         query = session.query(func.avg(mSalario.qt_salbruto).label('total_salario'), mCargo.nm_cargo).\
@@ -91,7 +94,11 @@ class TelaRelSalCargo(tk.Toplevel):
                         filter(mFuncionario.dt_demissao == None).\
                         filter(mCargo.cd_cargo == cd_cargoFunc).\
                         group_by(mCargo.nm_cargo)
-        return pd.read_sql(query.statement, query.session.bind)
+
+        result = pd.read_sql(query.statement, query.session.bind)
+        result['total_salario'] = result['total_salario'].round(2)
+        return result
+
 
     def mostrar_grafico(self, dados):
         self.ax.clear()
@@ -112,7 +119,6 @@ class TelaRelSalCargo(tk.Toplevel):
         self.ax.grid(True, linestyle='--', alpha=0.7)
         plt.tight_layout()
 
-        # Atualizar o gráfico na tela
         self.canvas.draw()
 
     def voltar_menu(self):
