@@ -95,7 +95,7 @@ class TelaRelFunc(tk.Toplevel):
         query = session.query(
             mFuncionario.nm_func.label('NOME') ,
             mFuncionario.nm_sobrenome.label('SOBRENOME'),
-            (datetime.datetime.now().year - func.extract('year', mFuncionario.dt_nasc)).label('IDADE'),
+            (datetime.now().year - func.extract('year', mFuncionario.dt_nasc)).label('IDADE'),
             mCargo.nm_cargo.label('CARGO'),
             mDepartamento.nm_dep.label('DEPARTAMENTO'),
             func.to_char(mFuncionario.dt_admissao, 'DD/MM/YYYY').label('ADMISSAO')
@@ -115,7 +115,7 @@ class TelaRelFunc(tk.Toplevel):
         query = session.query(
             mFuncionario.nm_func.label('NOME') ,
             mFuncionario.nm_sobrenome.label('SOBRENOME'),
-            (datetime.datetime.now().year - func.extract('year', mFuncionario.dt_nasc)).label('IDADE'),
+            (datetime.now().year - func.extract('year', mFuncionario.dt_nasc)).label('IDADE'),
             mCargo.nm_cargo.label('CARGO'),
             mDepartamento.nm_dep.label('DEPARTAMENTO'),
             func.to_char(mFuncionario.dt_admissao, 'DD/MM/YYYY').label('ADMISSAO')
