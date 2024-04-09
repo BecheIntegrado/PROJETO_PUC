@@ -1,0 +1,77 @@
+import tkinter as tk
+import pandas as pd
+from sqlalchemy import func
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from model.mCadastros import *
+
+class TelaRelBalanco(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Relatorio - Balanco Geral")
+        self.state("zoomed")
+
+        self.label_titulo = tk.Label(self, text="Balanco Geral", font=("Arial", 20, "bold"))
+        self.label_titulo.pack(pady=20)
+
+        self.frame_campos = tk.Frame(self)
+        self.frame_campos.pack(padx=20, pady=10)
+
+        self.btn_buscar = tk.Button(self.frame_campos, text="Buscar", command=self.gerar_grafico)
+        self.btn_buscar.grid(row=1, column=1, pady=5, padx=5, sticky="we")
+
+        self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltar_menu)
+        self.btn_voltar.grid(row=1, column=2, pady=5, padx=5, sticky="we")
+
+        self.fig = plt.figure(figsize=(10, 6))
+        self.ax = self.fig.add_subplot(111)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    def gerar_grafico(self):
+        dados = self.buscar_dados()
+
+        if dados.empty:
+            messagebox.showwarning("Aviso", "Nenhum dado encontrado para o cargo informado.")
+            return
+
+        self.mostrar_grafico(dados)
+
+    def buscar_dados(self):
+        query = (
+            session.query(
+                func.sum(mSalario.qt_salbruto).label('total_salario'),
+                func.to_date(mFuncionario.dt_admissao).label('admissao')
+            )
+            .join(mCadastro_funcionario, mSalario.cd_salario == mCadastro_funcionario.cd_salario)
+            .join(mFuncionario, mFuncionario.cd_func == mCadastro_funcionario.cd_func)
+            .join(mCargo, mCargo.cd_cargo == mCadastro_funcionario.cd_cargo)
+            .group_by(mFuncionario.dt_admissao)
+        )
+
+        result = pd.read_sql(query.statement, query.session.bind)
+        result['total_salario'] = result['total_salario'].round(2)
+        result['admissao'] = result['admissao'].astype(str).str[:7]
+
+        return result
+
+    def mostrar_grafico(self, dados):
+        self.ax.clear()
+
+        self.ax.bar(dados['admissao'], dados['total_salario'], label='Total Salário')
+
+        self.ax.set_title('Evolução do Total Salário')
+        self.ax.set_xlabel('Período (Mês/Ano)')
+        self.ax.set_ylabel('Valor')
+        self.ax.legend()
+
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+
+        self.canvas.draw()
+
+    def voltar_menu(self):
+        self.destroy()
+        self.master.deiconify()
+        self.master.state("zoomed")
