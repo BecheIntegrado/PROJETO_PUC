@@ -2,7 +2,7 @@ from model.mCadastros import *
 from sqlalchemy import create_engine, Column, String, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import datetime
+from datetime import datetime
 
 class cDepartamento():
     def __init__(self, nm_dep, cd_dep):
@@ -149,3 +149,33 @@ class cGetFuncionario():
         response = session.query(mFuncionario.nm_func, mFuncionario.nm_sobrenome).filter(mFuncionario.cd_func == self.cd_func)
 
         return response
+
+class cPonto():
+    def __init__(self, cd_func, data_registro):
+        self.cd_func = cd_func
+        self.data_registro = data_registro
+
+    def setPonto(self):
+        ponto = session.query(mPonto).filter(mPonto.cd_func == self.cd_func, mPonto.dt_expediente == self.data_registro).first()
+        if ponto is None:
+            ponto = mPonto(cd_func=  self.cd_func, dt_expediente = self.data_registro, dt_entrada=datetime.now(), dt_saida = None)
+            session.add(ponto)
+            session.commit()
+            return
+        else:
+            ponto = session.query(mPonto).filter(mPonto.cd_func ==  self.cd_func, mPonto.dt_expediente == self.data_registro, mPonto.dt_entrada != None, mPonto.dt_saida == None).first()
+            if ponto:
+                ponto.dt_saida = datetime.now()
+                session.add(ponto)
+                session.commit()
+                return
+            else:
+                ponto = session.query(mPonto).filter(mPonto.cd_func ==  self.cd_func, mPonto.dt_expediente == self.data_registro, mPonto.dt_entrada != None, mPonto.dt_saida == None).first()
+                if ponto:
+                    ponto.dt_saida = datetime.now()
+                    session.commit()
+                    return
+                else:
+                    ponto = mPonto(cd_func=  self.cd_func, dt_expediente = self.data_registro, dt_entrada=datetime.now(), dt_saida = None)
+                    session.add(ponto)
+                    session.commit()
