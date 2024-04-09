@@ -1,0 +1,73 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+import pandas as pd
+from sqlalchemy import func
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from model.mCadastros import *
+from control.cControlFunc import *
+
+class TelaRelTurno(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Relatorio - Turnos")
+        self.state("zoomed")
+
+        self.label_titulo = tk.Label(self, text="Relatorio - Turnos", font=("Arial", 20, "bold"))
+        self.label_titulo.pack(pady=20)
+
+        self.frame_campos = tk.Frame(self)
+        self.frame_campos.pack(padx=20, pady=10)
+
+        self.btnRelatorio = tk.Button(self.frame_campos, text="Buscar", command=self.gerar_grafico)
+        self.btnRelatorio.grid(row=3, column=1, pady=5, padx=5, sticky="we")
+
+        self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltar_menu)
+        self.btn_voltar.grid(row=3, column=3, pady=5, padx=5, sticky="we")
+
+        self.treeview = ttk.Treeview(self, columns=('TURNO', 'TEMP_ALMOCO', 'HR_ENTRADA', 'HR_SAIDA', 'ATIVO'), show='headings')
+        self.treeview.heading('TURNO', text='TURNO')
+        self.treeview.heading('TEMP_ALMOCO', text='TEMP_ALMOCO')
+        self.treeview.heading('HR_ENTRADA', text='HR_ENTRADA')
+        self.treeview.heading('HR_SAIDA', text='HR_SAIDA')
+        self.treeview.heading('ATIVO', text='ATIVO')
+        self.treeview.pack(fill='both', expand=True)
+
+        self.treeview.column('TURNO', anchor='center')
+        self.treeview.column('TEMP_ALMOCO', anchor='center')
+        self.treeview.column('HR_ENTRADA', anchor='center')
+        self.treeview.column('HR_SAIDA', anchor='center')
+        self.treeview.column('ATIVO', anchor='center')
+
+    def gerar_grafico(self):
+        dados = self.buscar_dados()
+
+        if dados.empty:
+            messagebox.showwarning("Aviso", "Nenhum dado encontrado para o funcionario informado.")
+            return
+
+        self.mostrar_tabela(dados)
+
+    def buscar_dados(self):
+        query = session.query(
+            mTurno.cd_turno.label('TURNO'),
+            mTurno.qt_tempper.label('TEMP_ALMOCO'),
+            mTurno.hr_inicio.label('HR_ENTRADA'),
+            mTurno.hr_fim.label('HR_SAIDA'),
+            mTurno.in_ativo.label('ATIVO')
+        )
+
+        return pd.read_sql(query.statement, query.session.bind)
+
+    def mostrar_tabela(self, dados):
+        self.treeview.delete(*self.treeview.get_children())  # Limpa os itens anteriores da tabela
+
+        # Adiciona os dados à tabela
+        for index, row in dados.iterrows():
+            self.treeview.insert('', 'end', values=(row['TURNO'], row['TEMP_ALMOCO'], row['HR_ENTRADA'], row['HR_SAIDA'], row['ATIVO']))
+
+    def voltar_menu(self):
+        self.destroy()
+        self.master.deiconify()
+        self.master.state("zoomed")
