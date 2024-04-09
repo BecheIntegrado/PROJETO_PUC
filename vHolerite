@@ -1,0 +1,120 @@
+import tkinter as tk
+from tkinter import messagebox
+from model.mCadastros import *
+from control.cControlFunc import *
+
+class TelaHolterite(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Holerites")
+        self.state("zoomed")
+
+        self.label_titulo = tk.Label(self, text="Holerites", font=("Arial", 20, "bold"))
+        self.label_titulo.pack(pady=20)
+
+        self.frame_campos = tk.Frame(self)
+        self.frame_campos.pack(padx=20, pady=10)
+
+        self.label_cd_func = tk.Label(self.frame_campos, text="Código do Funcionário:", font=("Arial", 14))
+        self.label_cd_func.grid(row=0, column=0, pady=5, padx=5, sticky="w")
+        self.entry_cd_func = tk.Entry(self.frame_campos, font=("Arial", 14), width=10)
+        self.entry_cd_func.grid(row=0, column=1, pady=5, padx=5, sticky="w")
+
+        self.btn_calcular = tk.Button(self.frame_campos, text="Calcular", command=self.exibir_holerite)
+        self.btn_calcular.grid(row=0, column=2, pady=5, padx=5, sticky="w")
+
+        self.btn_limpar = tk.Button(self.frame_campos, text="Limpar", command=self.limpar_campos)
+        self.btn_limpar.grid(row=0, column=3, pady=5, padx=5, sticky="w")
+
+        self.btn_limpar = tk.Button(self.frame_campos, text="Voltar", command=self.voltar_menu)
+        self.btn_limpar.grid(row=0, column=4, pady=5, padx=5, sticky="w")
+
+        self.label_resultados = tk.LabelFrame(self, text="Resultados", font=("Arial", 14))
+        self.label_resultados.pack(padx=20, pady=10, fill="both", expand="yes")
+
+        self.labels = [
+            ("Nome do Funcionário:", ""),
+            ("Cargo:", ""),
+            ("Salário Bruto:", ""),
+            ("INSS:", ""),
+            ("IRRF:", ""),
+            ("Salário Líquido:", "")
+        ]
+
+        for i, (label_text, value) in enumerate(self.labels):
+            label = tk.Label(self.label_resultados, text=label_text, font=("Arial", 14))
+            label.grid(row=i, column=0, pady=5, padx=5, sticky="w")
+            value_label = tk.Label(self.label_resultados, text=value, font=("Arial", 14))
+            value_label.grid(row=i, column=1, pady=5, padx=5, sticky="w")
+            setattr(self, f"label_{i}", value_label)
+
+    def exibir_holerite(self):
+        cd_func = self.entry_cd_func.get()
+        valorInss = 0
+        valorInssAux = 0
+        
+        if not cd_func:
+            messagebox.showerror("Erro", "Por favor, insira o código do funcionário.")
+            return
+
+        query = (
+            session.query(
+                mFuncionario.nm_func,
+                mFuncionario.nm_sobrenome,
+                mCargo.nm_cargo,
+                mSalario.qt_salbruto
+            )
+            .join(mCadastro_funcionario, mSalario.cd_salario == mCadastro_funcionario.cd_salario)
+            .join(mFuncionario, mFuncionario.cd_func == mCadastro_funcionario.cd_func)
+            .join(mCargo, mCargo.cd_cargo == mCadastro_funcionario.cd_cargo)
+            .filter(mFuncionario.cd_func == cd_func)
+        )
+
+        proventos = query.first()
+
+        if not proventos:
+            messagebox.showinfo("Informação", "Nenhum provento encontrado para o funcionário.")
+            return
+
+        salario_bruto = proventos.qt_salbruto
+
+        if salario_bruto <= 1412:
+            valorInss = salario_bruto * 0.075
+        elif 1412.01 >= salario_bruto <= 2666.68:
+            valorInss = (salario_bruto * 0.09) - 21.18
+        elif 2666.69 >= salario_bruto <= 4000.03:
+            valorInss = (salario_bruto * 0.12) - 101.18
+        elif 4000.04 >= salario_bruto <= 7786.02:
+            valorInss = (salario_bruto * 0.14) - 181.18
+        else:
+            valorInss = 877.24
+
+        salario_irrf = salario_bruto - valorInss
+
+        if 2259.21  >= salario_irrf <= 2826.65:
+            valorIrrf = (salario_irrf * 0.075) - 169,44
+        elif  2826.66 >= salario_irrf <= 3751.05:
+            valorIrrf = (salario_irrf * 0.15) - 381.44
+        elif  3751.06  >= salario_irrf <= 4664.68:
+            valorIrrf = (salario_irrf * 0.225) - 662.77
+        else:
+            valorIrrf = (salario_irrf * 0.275) - 896
+
+        salario_liquido = salario_irrf - valorIrrf
+
+        self.label_0.config(text=proventos.nm_func + ' ' + proventos.nm_sobrenome)
+        self.label_1.config(text=proventos.nm_cargo)
+        self.label_2.config(text=f"R${proventos.qt_salbruto:.2f}")
+        self.label_3.config(text=f"R${valorInss:.2f}")
+        self.label_4.config(text=f"R${valorIrrf:.2f}")
+        self.label_5.config(text=f"R${salario_liquido:.2f}")
+
+    def limpar_campos(self):
+        self.entry_cd_func.delete(0, tk.END)
+        for i in range(len(self.labels)):
+            getattr(self, f"label_{i}").config(text="")
+
+    def voltar_menu(self):
+        self.destroy()
+        self.master.deiconify()
+        self.master.state("zoomed")
