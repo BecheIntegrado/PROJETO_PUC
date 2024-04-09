@@ -17,28 +17,37 @@ class TelaCargo(tk.Toplevel):
 
         self.label_nm_cargo = tk.Label(self.frame_campos, text="Nome Cargo", font=("Arial", 14))
         self.label_nm_cargo.grid(row=1, column=0, pady=5)
-        self.entry_nm_cargo = tk.Entry(self.frame_campos, font=("Arial", 14))
+
+        self.entry_nm_cargo = tk.Entry(self.frame_campos, font=("Arial", 14), width=30)  # Definindo um tamanho fixo
         self.entry_nm_cargo.grid(row=1, column=1, pady=5)
 
         self.btn_salvar = tk.Button(self.frame_campos, text="Salvar", command=self.cadastrar_cargo)
-        self.btn_salvar.grid(row=3, column=0, pady=5, padx=5, sticky="we")
+        self.btn_salvar.grid(row=3, column=0, pady=5, padx=5)
 
-        self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltaMenu)
-        self.btn_voltar.grid(row=3, column=1, pady=5, padx=5, sticky="we")
+        self.btn_limpar = tk.Button(self.frame_campos, text="Limpar", command=self.limpar_campos)
+        self.btn_limpar.grid(row=3, column=1, pady=5, padx=5)
+
+        self.btn_voltar = tk.Button(self.frame_campos, text="Voltar", command=self.voltar_menu)
+        self.btn_voltar.grid(row=3, column=2, pady=5, padx=5)
+
+    def limpar_campos(self):
+        self.entry_nm_cargo.delete(0, tk.END)
 
     def cadastrar_cargo(self):
         nm_cargo = self.entry_nm_cargo.get()
 
         if not nm_cargo:
-            messagebox.showerror("Erro", "Por favor, preencha todos os campos.")
+            messagebox.showerror("Erro", "Por favor, preencha o campo.")
             return
 
-        salvarCargo = cCargo(cd_cargo = 0, nm_cargo=nm_cargo)
+        salvarCargo = cCargo(cd_cargo=0, nm_cargo=nm_cargo)
         salvarCargo.setCargo()
 
-        messagebox.showinfo("Sucesso", "Departamento cadastrado com sucesso!")
+        self.limpar_campos()
 
-    def voltaMenu(self):
+        messagebox.showinfo("Sucesso", "Cargo cadastrado com sucesso!")
+
+    def voltar_menu(self):
         self.destroy()
         self.master.deiconify()
         self.master.state("zoomed")
